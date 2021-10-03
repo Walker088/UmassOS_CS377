@@ -1,0 +1,205 @@
+
+
+<html> 
+    <head> 
+    <link rel="stylesheet" href="default.css" type="text/css" /> 
+    <title>CS377: Operating Systems</title> 
+    </head> 
+     
+    <body>
+    <div class="body"> 
+     
+    <h1>CS 377: Operating Systems - Project 1</h1> 
+    <h3>Due: Friday, February 14 @ 8 pm EDT</h3>
+    <h3>UMass Computer Science, Spring 2014 [<a href="http://lass.cs.umass.edu/~sbarker/teaching/courses/spring14/">Course Homepage</a>]</h3> 
+     
+    <div class="section"> 
+    <hr /> 
+    
+    <p>In this project, you will gain experience working with system calls, you will see how to implement a 
+    simple program using two different APIs (java API and C system calls), and you will learn about process management (process creation, termination etc). The project consists of two parts. In the first part, you will write a java program to implement a simple shell program. 
+    In the second part, you will write a C program making use of several UNIX system calls.  
+    You will also need to write a design document explaining how your program is organized (details below).
+    <hr />
+    
+    <h1> Part 1 - Simple Shell in Java</h1>
+    An interactive shell program such as bash takes command line input from the user and then execute the command/program specified by the user. The first part of this assignment is to write a simple interactive shell in Java.
+    Upon startup, your java shell should print a prompt "mysh>" and wait for user to type a command. When the user
+    type any command (e.g., "/bin/ls -l") the java program should fork a new process, have the child process
+    execute the specified command. The parent shell java process should wait for the process to finish and then
+    it should display a new prompt "mysh>"  indicating it is ready to accept new input from the user. "exit" can be used to exit the shell. <p>
+    
+    To write such a shell in Java, first review java documentation for the following:
+    <ol>
+    <li> <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Process.html"> Java Process class</a>
+    <li> <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Runtime.html"> Java Runtime class</a>
+    </ol>
+    Note: The above documentation is for Java 7 - equivalent documentation is available for (older) versions 
+    of Java that may be running on your machine, so be sure to find out which version you run and refer to the 
+    correct documentation.
+    <p>
+    As noted in the document, you can use Runtime.exec()  to create a new child process and have it
+    execute a command. Similarly. the java process class provides methods to wait for a child process to finish.
+    Use these methods (and/or any other methods that are necessary) to implement a simple shell as noted below.
+    <p>
+    For simplicity, assume that the user specifies the full path name for any command/executable that they
+    wish to execute.  Thus you do not need to deal with path name completion issues. As an example,
+    the user should type "/bin/ls" rather than  "ls". 
+    <p>
+    
+    
+    
+    
+    <h1>Part 2 - Clone Shell in C </h1>
+    
+    In the second part you will implement a similar shell in C. Thus will require you to program directly
+    using system calls. In class, 
+    we touched on how a few system calls (notably fork and exec) can be used to implement a command-line shell like Bash.  In this exercise, you will implement <b>closh</b> (Clone Shell), a simple shell-like program designed to run multiple copies of a program at once.
+    
+    <p>Like any other shell, closh takes as input the name of the program to run (e.g., hostname, pwd, echo, etc.).  However, closh also takes three additional inputs:
+    
+    <ol>
+    
+    <li>The number of copies (processes) of the program to run.  This is an integer from 1 to 9.
+    
+    <li>Whether the processes should execute concurrently or sequentially.
+    
+    <li>Optionally, a timeout (also an integer from 1 to 9) specifying the maximum duration of each process in seconds (reset between processes if running sequentially).  If a process takes longer than the timeout, it is terminated.  A timeout value of zero specifies no timeout.
+    
+    </ol>
+    
+    <p>Closh executes the given program the specified number of times, then returns to the prompt once all processes have either completed or timed out. Here is a simple example of using closh:
+    
+    <p>
+    sbarker@elnux2$ ./closh <br>
+    closh&gt; hostname<br>
+    &nbsp;  count&gt; 3<br>
+    &nbsp;  [p]arallel or [s]equential&gt; p<br>
+    &nbsp;  timeout&gt; 5<br>
+    elnux2<br>
+    elnux2<br>
+    elnux2<br>
+    closh&gt;
+    
+    <p>Additionally, each new process your program creates should print its process ID before executing the command, as well as any other output you would like that demonstrates how your program is operating.
+    
+    <p>We will provide a program skeleton (closh.c) that implements all required parsing and interface logic. The skeleton simply executes the given command once and exits. Your task is to replace this single system call with the real process logic of closh.
+    
+    <p>Run the following commands to download the starter files on EDLAB. While you are welcome to write code on your own machine, we will be evaluating your code on the EDLAB machines, so please make sure your final submission runs on EDLAB.
+    
+    <p><b> $ wget <a href="closh-starter.tar.gz">http://lass.cs.umass.edu/~sbarker/teaching/courses/377/labs/1/closh-starter.tar.gz</a></b>
+    <br><b> $ tar xzvf closh-starter.tar.gz</b><br>
+    
+    <h3>Tips</h3>
+    
+    <ul>
+    
+    <li>Useful functions and system calls include <a href="http://linux.die.net/man/3/fork">fork</a>, <a href="http://linux.die.net/man/3/execvp">exec</a> (specifically the execvp variant, in conjunction with the cmdTokens variable), <a href="http://linux.die.net/man/3/sleep">sleep</a>, <a href="http://linux.die.net/man/3/waitpid">waitpid</a>, and <a href="http://linux.die.net/man/3/kill">kill</a>. You should use the SIGKILL signal value in kill to terminate a process.
+    
+    <li>If you're trying to use waitpid and get a warning like "warning: implicit declaration of function 'waitpid'", you probably need to include an additional system header file.  Add the line "<b>#include &lt;sys/wait.h&gt;</b>" to the top of your file alongside the other #include statements.
+    
+    <li>Be careful when adding calls to fork -- if you write an infinite loop with a fork in it, a <a href="http://en.wikipedia.org/wiki/Fork_bomb">fork bomb</a> will result. If in doubt, you can add a sleep(1); before each fork during debugging, which will slow the rate of process creation.
+    
+    <li>Closh can execute a program with arguments, but cannot execute multiple programs using Bash constructs (e.g., 'sleep 3 &amp;&amp; echo hello' to sleep for 3 seconds, then print hello). However, you can accomplish the same by making a new Bash file (e.g., the included 'sleephello' script) and calling that from within closh (e.g., './sleephello'). This is useful for testing that your program correctly handles both parallel and sequential execution. If you do this, make sure the script you are trying to call is executable ('chmod +x sleephello').
+    
+    <li>If you have difficulties with C syntax or errors, email or see the TA. While minimal features of C are required for this assignment, we don't want you to spend too much time debugging issues with C itself.
+    
+    </ul>
+    
+    
+    
+    
+    <hr />
+    
+    <h1>Part 2B - Design Document and Observation</h1>
+    
+    Once you have written your Java and C versions of the shell, write a design 
+    document that documents your design choices.
+    <p>
+    In particular write your observations about writing a program by using a higher level
+    interface such as the Java API versus using the system call API. Comment 
+    on the differences between Java's exec method and the OS's fork/exec methods. 
+    Also comment on whether programming using higher level APIs is better/faster/easier
+    than using system calls by reflecting on your own experince with writing the two shell programs.
+    
+    
+    <hr />
+    
+    <h2>How to Turn in Project 1</h2>
+    <b>All of the following files  must be submitted on Moodle as a zip file to get
+    full credit for this assignment.</b>
+    
+    <ol>
+      <li>Your zip should contain one directory for Part 1 and a second directory for Part 2.
+      <li><b>Each</b> directory should include a copy of all source files for that part.
+      <li>Each directory should also include a README file containing an outline of what you did.
+    It should also explain and <b>document your design choices</b>. Keep it short
+    and to the point. If your implementation does not work, you should document the
+    problems in the README, preferably with your explanation of why it does
+    not work and how you would solve it if you had more time. <b>Of course,
+    <b>you should also comment your code</b>. We can't give you credit for something
+    we don't understand!</b>
+    <li>
+    Finally, each directory should contain a file showing sample output
+    from running your program.</li>
+    
+    <li> <b>Note:</b> We will <i>strictly</i> enforce policies on cheating.
+    Remember that we routinely run similarity checking programs on your
+    solutions to detect cheating. Please make   sure you turn in   your
+    own work.
+    <p>  You should be very careful about using code snippets you find on
+    the Internet. In general your code should be your own. It is OK to
+    read tutorials on the web and use these concepts in your
+    assignment. Blind use of code from web is strictly <b>disallowed</b>. Feel free to
+    check with us if you have questions on this policy. And be sure to CLEARLY document  any
+    Internet sources/ tutorials you have used to complete the assignment
+    in your README file. 
+    
+    </ol>
+    
+    <hr/>
+    
+    <h2>Project 1 Grading scheme</h2>
+     <ul> <li>(max 100) Total Grade
+     <li>(max 25) Part 1
+       <ol>
+         <li> (10) design document
+         <li> (15) java shell implementation 
+       </ol>
+     <li>(max 75) Part 2
+       <ol>
+       <li> (25) use of fork and exec 
+       <li> (5) parallel and sequential execution
+       <li> (10) process timeouts
+       <li> (10) code structure
+       <li> (10) code comments
+       <li> (15) design document
+       </ol>
+    </ul>
+    <p><b>Late Policy:</b> Project 1 is due at 8 PM on Friday, February 14.
+    Please refer to the course syllabus for late
+    policy on labs assignments. This late policy will be strictly
+    enforced.
+    Please start early so that you can submit the assignment on time.
+    </ol>
+    
+    <!--
+    <h3>Additional Resources</h3> 
+    <ul> 
+    <li><A HREF="http://inst.eecs.berkeley.edu/~cs162/sp08/Nachos/doc/index.html">Nachos API JavaDoc</A></li> 
+    <li><A HREF="http://inst.eecs.berkeley.edu/~cs162/sp08/Nachos/walk/">Nachos Java Walkthrough</A> at a high level.</li> 
+    <li><A HREF="http://www.cs.berkeley.edu/~kubitron/courses/cs162-F10/handouts.html">Nachos handout</A> by UC Berkeley.</li>
+    <li><A HREF="http://www.cs.ucsd.edu/classes/sp08/cse120/projects/nachos.pdf">The Nachos Paper</A> for the original C version.</li> 
+    </ul> 
+    -->
+     
+     
+    </div> <!-- end section --> 
+     
+    <div style="height: 20px"> </div> 
+     
+    </div> <!-- end of body--> 
+     
+    </body> 
+    </html> 
+    
